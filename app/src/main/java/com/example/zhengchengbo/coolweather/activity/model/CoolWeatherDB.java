@@ -31,7 +31,7 @@ public class CoolWeatherDB {
         return coolWeatherDB;
     }
 
-    public void SaveProvince(Province province) {
+    public void saveProvince(Province province) {
         if (province != null) {
             ContentValues values = new ContentValues();
             values.put("province_name", province.getProvinceName());
@@ -55,7 +55,7 @@ public class CoolWeatherDB {
         return list;
     }
 
-    public List<City> loadCity() {
+    public List<City> loadCity(int province_id) {
         List<City> list = new ArrayList<>();
         Cursor cursor = db.query("city", null, null, null, null, null, null);//问题是数据库查询的6个参数意义
         if (cursor.moveToFirst()) {
@@ -64,7 +64,7 @@ public class CoolWeatherDB {
                 city.setId(cursor.getInt(cursor.getColumnIndex("id")));
                 city.setCityName(cursor.getString(cursor.getColumnIndex("city_name")));
                 city.setCityCode(cursor.getString(cursor.getColumnIndex("city_code")));
-                city.setProvinceId(cursor.getInt(cursor.getColumnIndex("province_id")));
+                city.setProvinceId(cursor.getInt(province_id));
                 list.add(city);
             } while (cursor.moveToNext());
         }
@@ -93,14 +93,14 @@ public class CoolWeatherDB {
         }
     }
 
-    public List<County> loadCounty() {
+    public List<County> loadCounty(int city_id) {
         List<County> list = new ArrayList<>();
         Cursor cursor = db.query("county", null, null, null, null, null, null);
         if (cursor.moveToFirst()) {
             do {
                 County county=new County();
                 county.setId(cursor.getInt(cursor.getColumnIndex("id")));
-                county.setCityId(cursor.getInt(cursor.getColumnIndex("city_id")));
+                county.setCityId(cursor.getInt(city_id));
                 county.setCountyCode(cursor.getString(cursor.getColumnIndex("county_code")));
                 county.setCountyName(cursor.getString(cursor.getColumnIndex("county_name")));
                 list.add(county);

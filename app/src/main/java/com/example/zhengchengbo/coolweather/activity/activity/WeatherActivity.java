@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.SharedElementCallback;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
@@ -34,9 +35,9 @@ public class WeatherActivity extends AppCompatActivity {
     private TextView temp2;
     @InjectView(R.id.current_date)
     private TextView currentDateText;
-    @InjectView(R.id.button)
+    @InjectView(R.id.switch_city)
     private Button switchCity;
-    @InjectView(R.id.button2)
+    @InjectView(R.id.refresh_weather)
     private Button refreshWeather;
 
     @Override
@@ -106,7 +107,7 @@ public class WeatherActivity extends AppCompatActivity {
     }
 
 
-    @OnClick({R.id.button, R.id.button2})
+    @OnClick({R.id.button, R.id.button2,R.id.switch_city,R.id.refresh_weather})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button:
@@ -123,6 +124,20 @@ public class WeatherActivity extends AppCompatActivity {
                     quertWeatherInfo(weatherCode);
                 }
                 break;
+            case R.id.refresh_weather:
+                publishText.setText("同步中....");
+                SharedPreferences prefs=PreferenceManager.getDefaultSharedPreferences(this);
+                String weatherCodecode=prefs.getString("weather_code","");
+                if(!TextUtils.isEmpty(weatherCodecode)){
+                    quertWeatherInfo(weatherCodecode);
+                }
+                break;
+            case R.id.switch_city:
+                Intent intentOne=new Intent(this,ChooseActivity.class);
+                intentOne.putExtra("from_weather_activity",true);
+                startActivity(intentOne);
+                finish();
+                break;
             default:
                 break;
         }
@@ -132,5 +147,6 @@ public class WeatherActivity extends AppCompatActivity {
         String address = "http://www.weather.com.cn/data/cityInfo/" + weatherCode + ".xml";
         queryFromServer(address, "weatherCode");
     }
+
 
 }

@@ -1,10 +1,15 @@
 package com.example.zhengchengbo.coolweather.activity.activity;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -23,7 +28,9 @@ import com.example.zhengchengbo.coolweather.activity.util.Utilist;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+import butterknife.InjectView;
+
+public class ChooseActivity extends AppCompatActivity {
     public static final int LEVEL_PROVINCE = 0;
     public static final int LEVEL_CITY = 1;
     public static final int LEVEL_COUNTY = 2;
@@ -43,6 +50,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SharedPreferences prefs= PreferenceManager.getDefaultSharedPreferences(this);
+        if(prefs.getBoolean("city_seleted",false)){
+            Intent inent=new Intent(this,WeatherActivity.class);
+            startActivity(inent);
+            try {
+                finish();
+                return;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.choose_area);
         listView = (ListView) findViewById(R.id.list_view);
         titleText = (TextView) findViewById(R.id.title_text);
@@ -58,9 +77,17 @@ public class MainActivity extends AppCompatActivity {
                 } else if (currentLevel == LEVEL_CITY) {
                     selectedCity = cityList.get(position);
                     queryCounties();
+                }else if(currentLevel==LEVEL_CITY){
+                    String countyCode=countyList.get(position).getCountyCode();
+                    Intent intent=new Intent(ChooseActivity.this,WeatherActivity.class);
+                    intent.putExtra("county_code",countyCode);
+                    startActivity(intent);
+                    finish();
+
                 }
             }
         });
+        queryProvinces();
     }
 
     private void queryCounties() {
@@ -117,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
             address = "http://www.weather.com.cn/data/list3/city" + code + ".xml";
 
         } else {
-            address = "http://www.weather.com.cn/data/list3/city.xml"
+            address = "http://www.weather.com.cn/data/list3/city.xml";
         }
         showProgressDialog();
         HttpUtil.sendHttpRequest(address, new HttpCallBackListener() {
@@ -130,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
                     result= Utilist.handleCityReponse(coolWeatherDB,response,selectPronvice.getId());
 
                 } else if ("county".equals(type)) {
-                    result= Utilist.handleCountyReponse(coolWeatherDB,response,selectedCity.getId();
+                    result= Utilist.handleCountyReponse(coolWeatherDB,response,selectedCity.getId());
                 }
                 if(result){
                     runOnUiThread(new Runnable() {
@@ -155,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             closeProgressDialog();
-                            Toast.makeText(MainActivity.this, "加载失败", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ChooseActivity.this, "加载失败", Toast.LENGTH_SHORT).show();
                         }
                     });
             }
@@ -188,4 +215,5 @@ public class MainActivity extends AppCompatActivity {
             finish();
         }
     }
+
 }
